@@ -21,6 +21,7 @@ class TagsController extends AppController
     public function index()
     {
         $this->paginate = [
+            'conditions' => ['Tags.user_id' => $this->Auth->user('id')],
             'contain' => ['Users']
         ];
         $tags = $this->paginate($this->Tags);
@@ -29,6 +30,14 @@ class TagsController extends AppController
         $this->set('_serialize', ['tags']);
     }
 
+    public function isAuthorized($user)
+    {
+        $action = $this->request->getParam('action');
+        if (in_array($action, ['index', 'add'])){
+            return  true;
+        }
+    
+    }
     /**
      * View method
      *

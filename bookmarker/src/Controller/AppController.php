@@ -44,6 +44,7 @@ class AppController extends Controller
         $this->loadComponent('RequestHandler');
         $this->loadComponent('Flash');
         $this->loadComponent('Auth', [
+            'authorize'    => 'Controller',
             'authenticate' => ['form' => ['fields' => ['username' => 'email', 'password' => 'password' ] ] ],
             'loginAction' => ['controller' => 'Users', 'action' => 'login'],
             'unauthorizedRedirect' => $this->referer()
@@ -57,6 +58,10 @@ class AppController extends Controller
         //$this->loadComponent('Csrf');
     }
 
+    public function isAuthorized($user)
+    {
+        return false;
+    }
     /**
      * Before render callback.
      *

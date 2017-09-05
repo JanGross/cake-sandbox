@@ -21,12 +21,34 @@ class BookmarksController extends AppController
     public function index()
     {
         $this->paginate = [
+            'conditions' => [
+                'Bookmarks.user_id' => $this->Auth->user('id')
+            ],
             'contain' => ['Users']
         ];
         $bookmarks = $this->paginate($this->Bookmarks);
 
         $this->set(compact('bookmarks'));
         $this->set('_serialize', ['bookmarks']);
+    }
+
+    public function isAuthorized($user)
+    {
+        $action = $this->request->getParam('action');
+        if (in_array($action, ['add', 'index', 'tags'])) {
+            return true;
+        }
+
+        $bookmarkID = $this->request->getParam('pass.0');
+        if (!$bookmarkID) {
+            return false;
+        }
+
+        $bookmark = $this->Bookmarks->get($bookmarkID);
+        if ($bookmark->user_id == $user['id']) {
+            return true;
+        }
+        return parent::isAuthorized();
     }
 
     /**
@@ -56,6 +78,7 @@ class BookmarksController extends AppController
         $bookmark = $this->Bookmarks->newEntity();
         if ($this->request->is('post')) {
             $bookmark = $this->Bookmarks->patchEntity($bookmark, $this->request->getData());
+            $bookmark->user_id = $this->Auth->user('id');
             if ($this->Bookmarks->save($bookmark)) {
                 $this->Flash->success(__('The bookmark has been saved.'));
 
@@ -83,6 +106,7 @@ class BookmarksController extends AppController
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $bookmark = $this->Bookmarks->patchEntity($bookmark, $this->request->getData());
+            $bookmark->user_id = $this->Auth->user('id');
             if ($this->Bookmarks->save($bookmark)) {
                 $this->Flash->success(__('The bookmark has been saved.'));
 
